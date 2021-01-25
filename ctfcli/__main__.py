@@ -10,6 +10,7 @@ import click
 from ctfcli.cli.challenges import Challenge
 from ctfcli.cli.config import Config
 from ctfcli.cli.plugins import Plugins
+from ctfcli.cli.dump import Dump
 from ctfcli.utils.plugins import get_plugin_dir
 
 import fire
@@ -50,11 +51,15 @@ class CTFCLI(object):
     def plugins(self):
         return COMMANDS.get("plugins")
 
+    def dump(self):
+        return COMMANDS.get("dump")
+
 
 COMMANDS = {
     "challenge": Challenge(),
     "config": Config(),
     "plugins": Plugins(),
+    "dump": Dump(),
     "cli": CTFCLI(),
 }
 

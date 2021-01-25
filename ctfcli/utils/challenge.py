@@ -1,4 +1,5 @@
 from pathlib import Path
+from os.path import join
 
 import yaml
 
@@ -21,6 +22,21 @@ def load_challenge(path):
     except FileNotFoundError:
         click.secho(f"No challenge.yml was found in {path}", fg="red")
         return
+
+
+def get_challenge(id):
+    s = generate_session()
+    return s.get(f"/api/v1/challenges/{id}", json=True).json()["data"]
+
+
+def get_challenge_flags(id):
+    s = generate_session()
+    return s.get(f"/api/v1/challenges/{id}/flags", json=True).json()["data"]
+
+
+def get_challenge_hints(id):
+    s = generate_session()
+    return s.get(f"/api/v1/challenges/{id}/hints", json=True).json()["data"]
 
 
 def load_installed_challenges():
@@ -282,3 +298,62 @@ def lint_challenge(path):
         exit(1)
 
     exit(0)
+
+
+def dump_challenge(challenge, challenge_folder_path):
+    # Retrieve the challenge informations
+    challenge = get_challenge(challenge["id"])
+
+    data = {
+        "name": challenge["name"],
+        "category": challenge["category"],
+        "description": challenge["description"],
+        "type": challenge["type"],
+        "value": int(challenge["value"]),
+        "attempts": int(challenge["attempts"]),
+        "state": challenge["state"],
+    }
+
+    if challenge.get("tags"):
+        data["tags"] = challenge.get("tags")
+
+    # Retrieve the flags of the challenge
+    flags = get_challenge_flags(challenge["id"])
+
+    if flags:
+        flags_data = []
+
+        for flag in flags:
+            flag_data = {
+                "type": flag["type"],
+                "content": flag["content"],
+            }
+
+            if flag["data"]:
+                flag_data["data"] = flag["data"]
+
+            flags_data.append(flag_data)
+
+        data["flags"] = flags_data
+
+    # Retrieve the hints of the challenge
+    hints = get_challenge_hints(challenge["id"])
+
+    if hints:
+        hints_data = []
+
+        for hint in hints:
+            if hint["cost"] != 0:
+                hint_data = {"content": hint["content"], "cost": int(hint["cost"])}
+            else:
+                hint_data = hint["content"]
+
+            hints_data.append(hint_data)
+
+        data["hints"] = hints_data
+
+    # Save the challenge information in 'challenge.yml' in the folder of the challenge
+    with open(join(challenge_folder_path, "challenge.yml"), "w") as challenge_file:
+        yaml.dump(data, challenge_file)
+
+    click.secho(f"{challenge['name']} successfully dumped !", fg="green")

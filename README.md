@@ -82,6 +82,28 @@ Syncing buffer_overflow
 Success!
 ```
 
+## 5. Dump challenges
+
+Dumping the challenges will pull down all the challenges from the CTFd instance. It will create the directory structure by creating a folder for each category and each challenge
+
+```
+❯ ctf dump challenges
+Buffer Overflow successfully dumped !
+Crypto Challenge successfully dumped !
+Pwn Challenge successfully dumped !
+
+❯ tree .
+.
+├── Crypto
+│   └── Crypto Challenge
+│       └── challenge.yml
+└── Pwn
+    ├── Buffer Overflow
+    │   └── challenge.yml
+    └── Pwn Challenge
+        └── challenge.yml
+```
+
 # Challenge Templates
 
 `ctfcli` contains pre-made challenge templates to make it faster to create CTF challenges with safe defaults.
